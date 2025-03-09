@@ -81,6 +81,37 @@ def compute_trajectory(v0, angle, g, drag, mass):
     final_speed = math.sqrt(vx[-1]**2 + vy[-1]**2)
     return t_vals, x, y, vx, vy, max_height, range_val, final_speed
 
+import plotly.graph_objects as go
+
+# Funkcja do generowania wykresu prędkości
+def plot_velocity(t_vals, vx, vy):
+    v = np.sqrt(vx**2 + vy**2)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=t_vals, y=v, mode="lines", name="Prędkość"))
+    fig.update_layout(
+        title="Prędkość w funkcji czasu",
+        xaxis_title="Czas [s]",
+        yaxis_title="Prędkość [m/s]",
+        template="plotly_white"
+    )
+    return fig
+
+# Funkcja do generowania wykresu przyspieszenia
+def plot_acceleration(t_vals, vx, vy):
+    ax = np.gradient(vx, t_vals)
+    ay = np.gradient(vy, t_vals)
+    a = np.sqrt(ax**2 + ay**2)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=t_vals, y=a, mode="lines", name="Przyspieszenie"))
+    fig.update_layout(
+        title="Przyspieszenie w funkcji czasu",
+        xaxis_title="Czas [s]",
+        yaxis_title="Przyspieszenie [m/s²]",
+        template="plotly_white"
+    )
+    return fig
+
+
 # Obliczanie trajektorii po kliknięciu "Ognia!"
 if fire:
     t_vals, x, y, vx, vy, max_height, range_val, final_speed = compute_trajectory(v0, angle, g, drag, mass)
@@ -94,6 +125,8 @@ if fire:
         't': t_vals,
         'x': x,
         'y': y,
+        'vx': vx,
+        'vy': vy,
         'max_height': max_height,
         'range': range_val,
         'final_speed': final_speed
@@ -127,3 +160,10 @@ if st.session_state['trajectories']:
     col2.metric("Zasięg", f"{last_traj['range']:.2f} m")
     col3.metric("Wysokość maksymalna", f"{last_traj['max_height']:.2f} m")
     col4.metric("Prędkość końcowa", f"{last_traj['final_speed']:.2f} m/s")
+
+    # Generowanie i wyświetlanie wykresów
+    velocity_fig = plot_velocity(last_traj['t'], last_traj['vx'], last_traj['vy'])
+    acceleration_fig = plot_acceleration(last_traj['t'], last_traj['vx'], last_traj['vy'])
+
+    st.plotly_chart(velocity_fig, use_container_width=True)
+    st.plotly_chart(acceleration_fig, use_container_width=True)
