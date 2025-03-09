@@ -1,3 +1,4 @@
 plotly
 numpy
 solve_ivp
+streamlit
